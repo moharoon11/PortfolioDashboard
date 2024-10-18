@@ -76,7 +76,7 @@ const Message = styled.p`
   color: ${(props) => (props.success ? 'green' : 'red')};
 `;
 
-const Login = () => {
+const Login = ({redirect}) => {
   const [userId, setUserId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -169,9 +169,10 @@ const Login = () => {
             </IconButton>
           </PasswordWrapper>
         </InputField>
-
+         
         <Button type="submit">Login</Button>
 
+        {redirect === "Login to access dashboard..." && <Message>{redirect}</Message>}
         {message && <Message success={message === 'Login successful'}>{message}</Message>}
       </Form>
     </Container>

@@ -3,10 +3,15 @@ import styled from 'styled-components';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import Register from '../Components/Register';
 import Login from '../Components/Login';
+import {useLocation} from 'react-router-dom';
 
 function Index() {
   const [activeTab, setActiveTab] = useState('Login');
   const [isOpen, setIsOpen] = useState(false);
+
+  const location = useLocation();
+
+  const {message} = location.state || {};
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -43,7 +48,7 @@ function Index() {
 
       <MainContent>
         {activeTab === 'Register' && <Register />}
-        {activeTab === 'Login' && <Login />}
+        {activeTab === 'Login' && <Login redirect={message ? message : ""}/>}
       </MainContent>
     </>
   );
