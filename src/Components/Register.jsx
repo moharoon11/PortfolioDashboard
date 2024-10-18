@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaFileUpload, FaEye, FaEyeSlash } from 'react-icons/fa';
 
+
+
 const Container = styled.div`
   display: flex;
   justify-content: center;
@@ -220,9 +222,13 @@ function Register() {
             throw new Error(result.message || 'Error registering user.');
         }
 
+        
+
         console.log('User registered successfully:', result);
         setError('');
         setSuccess(result.message); // Set success message from the response
+        
+
     } catch (err) {
         console.error('Error registering user:', err);
         setError(err.message || 'Error registering user.');

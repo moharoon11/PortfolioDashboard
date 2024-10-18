@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -81,6 +82,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -111,6 +113,14 @@ const Login = () => {
         setUserId('');
         setEmail('');
         setPassword('');
+
+     
+        navigate('/dashboard', {
+          state: {
+            isUserLogged: true,
+            userId: parseInt(userId)
+          }
+        })
       } else {
         setMessage(data); // Display the error message from the backend
       }
