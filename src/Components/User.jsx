@@ -114,42 +114,66 @@ function User({ userId }) {
     fetchUserData();
   }, [userId]);
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
+  // Handle text field updates
+  const handleTextFieldUpdate = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append('userDTO', JSON.stringify(userDTO)); // Add userDTO as a JSON string
-
-    // Check if files are selected before appending them
-    if (userDTO.userImage1) formData.append('userProfile1', userDTO.userImage1);
-    if (userDTO.userImage2) formData.append('userProfile2', userDTO.userImage2);
-    if (userDTO.userImage3) formData.append('userProfile3', userDTO.userImage3);
-    if (userDTO.resume) formData.append('resume', userDTO.resume);
-
     try {
-      const response = await fetch('http://localhost:8888/api/users/update', {
-        method: 'POST', // Ensure it matches the backend
-        body: formData,
-        credentials: 'include', // Include credentials if needed
+      const response = await fetch(`http://localhost:8888/api/users/update/info`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userDTO),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update user data');
+        throw new Error('Failed to update user fields');
       }
 
       const result = await response.json();
       alert(result.message); // Display success message
     } catch (error) {
-      console.error('Error updating user data:', error);
-      alert('Failed to update user data. Please try again.');
+      console.error('Error updating user fields:', error);
+      alert('Failed to update user fields. Please try again.');
+    }
+  };
+
+  // Handle file uploads
+  const handleFileUpload = async (fileType) => {
+    const formData = new FormData();
+    if (fileType === 'userImage1' && userDTO.userImage1) {
+      formData.append('userImage1', userDTO.userImage1);
+    } else if (fileType === 'userImage2' && userDTO.userImage2) {
+      formData.append('userImage2', userDTO.userImage2);
+    } else if (fileType === 'userImage3' && userDTO.userImage3) {
+      formData.append('userImage3', userDTO.userImage3);
+    } else if (fileType === 'resume' && userDTO.resume) {
+      formData.append('resume', userDTO.resume);
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8888/api/users/update/${fileType}/${userId}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update file');
+      }
+
+      const result = await response.json();
+      alert(result.message); // Display success message
+    } catch (error) {
+      console.error('Error updating file:', error);
+      alert('Failed to update file. Please try again.');
     }
   };
 
   return (
     <UserControlsContainer>
       <Title>Update User Information</Title>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleTextFieldUpdate}>
         <FormGroup>
           <Label htmlFor="name">Name</Label>
           <Input
@@ -206,48 +230,53 @@ function User({ userId }) {
           />
         </FormGroup>
 
-        <FormGroup>
-          <Label htmlFor="userImage1">Profile Image 1 (Optional)</Label>
-          <Input
-            type="file"
-            id="userImage1"
-            accept="image/*"
-            onChange={(e) => setUserDTO({ ...userDTO, userImage1: e.target.files[0] })}
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="userImage2">Profile Image 2 (Optional)</Label>
-          <Input
-            type="file"
-            id="userImage2"
-            accept="image/*"
-            onChange={(e) => setUserDTO({ ...userDTO, userImage2: e.target.files[0] })}
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="userImage3">Profile Image 3 (Optional)</Label>
-          <Input
-            type="file"
-            id="userImage3"
-            accept="image/*"
-            onChange={(e) => setUserDTO({ ...userDTO, userImage3: e.target.files[0] })}
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="resume">Resume (Optional)</Label>
-          <Input
-            type="file"
-            id="resume"
-            accept=".pdf,.doc,.docx"
-            onChange={(e) => setUserDTO({ ...userDTO, resume: e.target.files[0] })}
-          />
-        </FormGroup>
-
-        <Button type="submit">Update User</Button>
+        <Button type="submit">Update User Fields</Button>
       </form>
+
+      {/* File upload sections */}
+      <FormGroup>
+        <Label htmlFor="userImage1">Profile Image 1 (Optional)</Label>
+        <Input
+          type="file"
+          id="userImage1"
+          accept="image/*"
+          onChange={(e) => setUserDTO({ ...userDTO, userImage1: e.target.files[0] })}
+        />
+        <Button type="button" onClick={() => handleFileUpload('userImage1')}>Upload Image 1</Button>
+      </FormGroup>
+
+      <FormGroup>
+        <Label htmlFor="userImage2">Profile Image 2 (Optional)</Label>
+        <Input
+          type="file"
+          id="userImage2"
+          accept="image/*"
+          onChange={(e) => setUserDTO({ ...userDTO, userImage2: e.target.files[0] })}
+        />
+        <Button type="button" onClick={() => handleFileUpload('userImage2')}>Upload Image 2</Button>
+      </FormGroup>
+
+      <FormGroup>
+        <Label htmlFor="userImage3">Profile Image 3 (Optional)</Label>
+        <Input
+          type="file"
+          id="userImage3"
+          accept="image/*"
+          onChange={(e) => setUserDTO({ ...userDTO, userImage3: e.target.files[0] })}
+        />
+        <Button type="button" onClick={() => handleFileUpload('userImage3')}>Upload Image 3</Button>
+      </FormGroup>
+
+      <FormGroup>
+        <Label htmlFor="resume">Resume (Optional)</Label>
+        <Input
+          type="file"
+          id="resume"
+          accept=".pdf,.doc,.docx"
+          onChange={(e) => setUserDTO({ ...userDTO, resume: e.target.files[0] })}
+        />
+        <Button type="button" onClick={() => handleFileUpload('resume')}>Upload Resume</Button>
+      </FormGroup>
     </UserControlsContainer>
   );
 }
