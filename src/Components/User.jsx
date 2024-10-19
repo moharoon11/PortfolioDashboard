@@ -83,6 +83,12 @@ const TogglePasswordButton = styled.button`
   padding: 0;
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+`;
+
 function User({ userId }) {
   const [userDTO, setUserDTO] = useState({
     userId: userId,
@@ -98,6 +104,7 @@ function User({ userId }) {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   // Fetch user data when the component mounts
   useEffect(() => {
@@ -114,10 +121,41 @@ function User({ userId }) {
     fetchUserData();
   }, [userId]);
 
+  // Password validation function
+  const validatePassword = (password) => {
+    const minLength = 6;
+    const hasNumber = /\d/; // Regular expression to check for at least one number
+
+    return password.length >= minLength && hasNumber.test(password);
+  };
+
+  // New email validation function
+  const isValidEmail = (email) => {
+    const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; // Updated regex pattern
+    const trimmedEmail = email.trim(); // Trim leading/trailing whitespace
+
+    // Check if the email is valid and not empty
+    return trimmedEmail && pattern.test(trimmedEmail);
+  };
+
   // Handle text field updates
   const handleTextFieldUpdate = async (e) => {
     e.preventDefault();
-
+  
+    // Validate password before submitting
+    if (!validatePassword(userDTO.password)) {
+      alert('Password must be at least 6 characters long and contain at least one number.');
+      return;
+    }
+  
+    // Validate email
+    if (!isValidEmail(userDTO.email)) {
+      setEmailError('Please enter a valid email address in the format: example@domain.com');
+      return;
+    }
+  
+    setEmailError(''); // Clear previous error message
+  
     try {
       const response = await fetch(`http://localhost:8888/api/users/update/info`, {
         method: 'PUT',
@@ -126,18 +164,23 @@ function User({ userId }) {
         },
         body: JSON.stringify(userDTO),
       });
-
+  
       if (!response.ok) {
-        throw new Error('Failed to update user fields');
+        const errorResponse = await response.json(); // Get the error response body
+  
+        // Check if the errorResponse has a message property
+        const errorMessage = errorResponse.message || 'An error occurred. Please try again.';
+        throw new Error(errorMessage); // Throw an error with the specific message
       }
-
+  
       const result = await response.json();
       alert(result.message); // Display success message
     } catch (error) {
       console.error('Error updating user fields:', error);
-      alert('Failed to update user fields. Please try again.');
+      alert(`Failed to update user fields: ${error.message}`); // Show backend error message
     }
   };
+  
 
   // Handle file uploads
   const handleFileUpload = async (fileType) => {
@@ -191,9 +234,13 @@ function User({ userId }) {
             type="email"
             id="email"
             value={userDTO.email}
-            onChange={(e) => setUserDTO({ ...userDTO, email: e.target.value })}
+            onChange={(e) => {
+              setUserDTO({ ...userDTO, email: e.target.value });
+              setEmailError(''); // Clear error on input change
+            }}
             required
           />
+          {emailError && <ErrorMessage>{emailError}</ErrorMessage>} {/* Display email error */}
         </FormGroup>
 
         <FormGroup>
@@ -238,8 +285,8 @@ function User({ userId }) {
         <Label htmlFor="userImage1">Profile Image 1 (Optional)</Label>
         <Input
           type="file"
-          id="userImage1"
           accept="image/*"
+          id="userImage1"
           onChange={(e) => setUserDTO({ ...userDTO, userImage1: e.target.files[0] })}
         />
         <Button type="button" onClick={() => handleFileUpload('userImage1')}>Upload Image 1</Button>
@@ -249,8 +296,8 @@ function User({ userId }) {
         <Label htmlFor="userImage2">Profile Image 2 (Optional)</Label>
         <Input
           type="file"
-          id="userImage2"
           accept="image/*"
+          id="userImage2"
           onChange={(e) => setUserDTO({ ...userDTO, userImage2: e.target.files[0] })}
         />
         <Button type="button" onClick={() => handleFileUpload('userImage2')}>Upload Image 2</Button>
@@ -260,8 +307,8 @@ function User({ userId }) {
         <Label htmlFor="userImage3">Profile Image 3 (Optional)</Label>
         <Input
           type="file"
-          id="userImage3"
           accept="image/*"
+          id="userImage3"
           onChange={(e) => setUserDTO({ ...userDTO, userImage3: e.target.files[0] })}
         />
         <Button type="button" onClick={() => handleFileUpload('userImage3')}>Upload Image 3</Button>
@@ -271,8 +318,8 @@ function User({ userId }) {
         <Label htmlFor="resume">Resume (Optional)</Label>
         <Input
           type="file"
-          id="resume"
           accept=".pdf,.doc,.docx"
+          id="resume"
           onChange={(e) => setUserDTO({ ...userDTO, resume: e.target.files[0] })}
         />
         <Button type="button" onClick={() => handleFileUpload('resume')}>Upload Resume</Button>

@@ -12,7 +12,7 @@ function Dashboard() {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('Projects');
+  const [activeTab, setActiveTab] = useState('User');
 
   const handleLogout = () => {
     navigate('/');
