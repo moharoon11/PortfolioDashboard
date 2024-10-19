@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
+// Styled components for the form
 const UserControlsContainer = styled.div`
   max-width: 600px;
   margin: 30px auto;
@@ -82,7 +83,7 @@ const TogglePasswordButton = styled.button`
   padding: 0;
 `;
 
-function UserControlls({ userId }) {
+function User({ userId }) {
   const [userDTO, setUserDTO] = useState({
     userId: userId,
     email: '',
@@ -95,6 +96,7 @@ function UserControlls({ userId }) {
     userImage3: null,
     resume: null,
   });
+
   const [showPassword, setShowPassword] = useState(false);
 
   // Fetch user data when the component mounts
@@ -102,9 +104,7 @@ function UserControlls({ userId }) {
     const fetchUserData = async () => {
       try {
         const response = await fetch(`http://localhost:8888/api/users/get/${userId}`);
-        if (!response.ok) throw new Error('Failed to fetch user data');
         const data = await response.json();
-        console.log(data);
         setUserDTO({ ...data });
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -119,33 +119,32 @@ function UserControlls({ userId }) {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append('userDTO', JSON.stringify(userDTO));
+    formData.append('userDTO', JSON.stringify(userDTO)); // Add userDTO as a JSON string
+
+    // Check if files are selected before appending them
     if (userDTO.userImage1) formData.append('userProfile1', userDTO.userImage1);
     if (userDTO.userImage2) formData.append('userProfile2', userDTO.userImage2);
     if (userDTO.userImage3) formData.append('userProfile3', userDTO.userImage3);
     if (userDTO.resume) formData.append('resume', userDTO.resume);
 
     try {
-        const response = await fetch('http://localhost:8888/api/users/update', {
-            method: 'PUT',
-            body: formData,
-        
-            // Don't set Content-Type header when sending FormData
-        });
+      const response = await fetch('http://localhost:8888/api/users/update', {
+        method: 'POST', // Ensure it matches the backend
+        body: formData,
+        credentials: 'include', // Include credentials if needed
+      });
 
-        // Check if the response is ok (status in the range 200-299)
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+      if (!response.ok) {
+        throw new Error('Failed to update user data');
+      }
 
-        const result = await response.json();
-        alert(result.message); // Display success message
+      const result = await response.json();
+      alert(result.message); // Display success message
     } catch (error) {
-        console.error('Error updating user data:', error);
-        alert('Failed to update user data. Please try again.'); // Display an error message to the user
+      console.error('Error updating user data:', error);
+      alert('Failed to update user data. Please try again.');
     }
-};
-
+  };
 
   return (
     <UserControlsContainer>
@@ -253,4 +252,4 @@ function UserControlls({ userId }) {
   );
 }
 
-export default UserControlls;
+export default User;

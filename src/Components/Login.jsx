@@ -23,7 +23,6 @@ const InputField = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 15px;
-  position: relative;
 `;
 
 const Label = styled.label`
@@ -39,11 +38,10 @@ const Input = styled.input`
   font-size: 16px;
   width: 100%;
   box-sizing: border-box;
-  padding-right: 40px;  /* Adjust padding to avoid overlapping with the icon */
 `;
 
 const PasswordWrapper = styled.div`
-  position: relative;  /* Make the wrapper position relative to place the icon */
+  position: relative;
 `;
 
 const IconButton = styled.span`
@@ -76,7 +74,7 @@ const Message = styled.p`
   color: ${(props) => (props.success ? 'green' : 'red')};
 `;
 
-const Login = ({redirect}) => {
+const Login = () => {
   const [userId, setUserId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -90,44 +88,39 @@ const Login = ({redirect}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const loginRequest = {
-      userId: parseInt(userId), // Convert to integer
+      userId: userId,
       email: email,
       password: password,
     };
-
+  
     try {
       const response = await fetch('http://localhost:8888/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(loginRequest),
+        body: JSON.stringify(loginRequest) // Corrected JSON.stringify() method
       });
-
-      const data = await response.text(); // Get response text
-
+  
       if (response.ok) {
         setMessage('Login successful');
-        setUserId('');
-        setEmail('');
-        setPassword('');
-
-     
         navigate('/dashboard', {
           state: {
             isUserLogged: true,
-            userId: parseInt(userId)
-          }
-        })
+            userId: loginRequest.userId,
+          },
+        });
       } else {
-        setMessage(data); // Display the error message from the backend
+        const errorMessage = await response.text();
+        setMessage(errorMessage);
       }
     } catch (error) {
       setMessage('Error logging in. Please try again later.');
     }
   };
+  
 
   return (
     <Container>
@@ -169,10 +162,9 @@ const Login = ({redirect}) => {
             </IconButton>
           </PasswordWrapper>
         </InputField>
-         
+
         <Button type="submit">Login</Button>
 
-        {redirect === "Login to access dashboard..." && <Message>{redirect}</Message>}
         {message && <Message success={message === 'Login successful'}>{message}</Message>}
       </Form>
     </Container>
