@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaFileUpload, FaEye, FaEyeSlash } from 'react-icons/fa';
 
-
-
 const Container = styled.div`
   display: flex;
   justify-content: center;
@@ -142,6 +140,13 @@ const PasswordInput = styled(Input)`
   flex-grow: 1; /* Make input take remaining space */
 `;
 
+const ImagePreview = styled.img`
+  margin-top: 10px;
+  max-width: 100%;
+  max-height: 200px; /* Adjust as needed */
+  border-radius: 8px;
+`;
+
 function Register() {
   const [formData, setFormData] = useState({
     userId: '',
@@ -181,28 +186,28 @@ function Register() {
     const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // At least 8 chars, 1 letter and 1 number
 
     if (!userIdPattern.test(formData.userId)) {
-        setError('User ID must be exactly 8 digits.');
-        return;
+      setError('User ID must be exactly 8 digits.');
+      return;
     }
 
     if (!emailPattern.test(formData.email)) {
-        setError('Invalid email format.');
-        return;
+      setError('Invalid email format.');
+      return;
     }
 
     if (!passwordPattern.test(formData.password)) {
-        setError('Password must be at least 8 characters long and contain at least one letter and one number.');
-        return;
+      setError('Password must be at least 8 characters long and contain at least one letter and one number.');
+      return;
     }
 
     const data = new FormData();
     data.append('userDTO', new Blob([JSON.stringify({
-        userId: formData.userId,
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-        about: formData.about,
+      userId: formData.userId,
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      role: formData.role,
+      about: formData.about,
     })], { type: 'application/json' }));
 
     data.append('userProfile1', formData.userProfile1);
@@ -211,30 +216,26 @@ function Register() {
     data.append('resume', formData.resume);
 
     try {
-        const response = await fetch('http://localhost:8888/api/users/register', {
-            method: 'POST',
-            body: data,
-        });
+      const response = await fetch('http://localhost:8888/api/users/register', {
+        method: 'POST',
+        body: data,
+      });
 
-        const result = await response.json(); // Parse the JSON response
+      const result = await response.json(); // Parse the JSON response
 
-        if (!response.ok) {
-            throw new Error(result.message || 'Error registering user.');
-        }
+      if (!response.ok) {
+        throw new Error(result.message || 'Error registering user.');
+      }
 
-        
-
-        console.log('User registered successfully:', result);
-        setError('');
-        setSuccess(result.message); // Set success message from the response
-        
-
+      console.log('User registered successfully:', result);
+      setError('');
+      setSuccess(result.message); // Set success message from the response
     } catch (err) {
-        console.error('Error registering user:', err);
-        setError(err.message || 'Error registering user.');
-        setSuccess(''); // Clear success message on error
+      console.error('Error registering user:', err);
+      setError(err.message || 'Error registering user.');
+      setSuccess(''); // Clear success message on error
     }
-};
+  };
 
   return (
     <Container>
@@ -289,7 +290,7 @@ function Register() {
               required
             />
             <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 10px' }}>
-              {showPassword ? <FaEyeSlash /> : <FaEye />} {/* Show/hide icon */}
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
             </button>
           </PasswordWrapper>
         </InputField>
@@ -313,72 +314,89 @@ function Register() {
             placeholder="Tell us about yourself"
             value={formData.about}
             onChange={handleChange}
-            required
           />
         </InputField>
 
+        {/* File Uploads */}
         <InputField>
-          <FileUploadButton>
-            Upload Profile Image 1
-            <input
+          <FileUploadButton htmlFor="userProfile1">
+            Upload User Profile Image 1
+            <Input
               type="file"
+              id="userProfile1"
               name="userProfile1"
               accept="image/*"
               onChange={handleFileChange}
-              style={{ display: 'none' }}
-              required
+              style={{ display: 'none' }} // Hide the default file input
             />
           </FileUploadButton>
-          {formData.userProfile1Name && <FileName>{formData.userProfile1Name}</FileName>}
+          {formData.userProfile1 && (
+            <>
+              <FileName>{formData.userProfile1Name}</FileName>
+              <ImagePreview src={URL.createObjectURL(formData.userProfile1)} alt="User Profile 1 Preview" />
+            </>
+          )}
         </InputField>
 
         <InputField>
-          <FileUploadButton>
-            Upload Profile Image 2
-            <input
+          <FileUploadButton htmlFor="userProfile2">
+            Upload User Profile Image 2
+            <Input
               type="file"
+              id="userProfile2"
               name="userProfile2"
               accept="image/*"
               onChange={handleFileChange}
-              style={{ display: 'none' }}
-              required
+              style={{ display: 'none' }} // Hide the default file input
             />
           </FileUploadButton>
-          {formData.userProfile2Name && <FileName>{formData.userProfile2Name}</FileName>}
+          {formData.userProfile2 && (
+            <>
+              <FileName>{formData.userProfile2Name}</FileName>
+              <ImagePreview src={URL.createObjectURL(formData.userProfile2)} alt="User Profile 2 Preview" />
+            </>
+          )}
         </InputField>
 
         <InputField>
-          <FileUploadButton>
-            Upload Profile Image 3
-            <input
+          <FileUploadButton htmlFor="userProfile3">
+            Upload User Profile Image 3
+            <Input
               type="file"
+              id="userProfile3"
               name="userProfile3"
               accept="image/*"
               onChange={handleFileChange}
-              style={{ display: 'none' }}
-              required
+              style={{ display: 'none' }} // Hide the default file input
             />
           </FileUploadButton>
-          {formData.userProfile3Name && <FileName>{formData.userProfile3Name}</FileName>}
+          {formData.userProfile3 && (
+            <>
+              <FileName>{formData.userProfile3Name}</FileName>
+              <ImagePreview src={URL.createObjectURL(formData.userProfile3)} alt="User Profile 3 Preview" />
+            </>
+          )}
         </InputField>
 
         <InputField>
-          <FileUploadButton>
+          <FileUploadButton htmlFor="resume">
             Upload Resume
-            <input
+            <Input
               type="file"
+              id="resume"
               name="resume"
-              accept=".pdf, .doc, .docx"
+              accept=".pdf"
               onChange={handleFileChange}
-              style={{ display: 'none' }}
-              required
+              style={{ display: 'none' }} // Hide the default file input
             />
           </FileUploadButton>
-          {formData.resumeName && <FileName>{formData.resumeName}</FileName>}
+          {formData.resume && (
+            <FileName>{formData.resumeName}</FileName>
+          )}
         </InputField>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        {success && <SuccessMessage>{success}</SuccessMessage>} {/* Display success message */}
+        <ErrorMessage>{error}</ErrorMessage>
+        <SuccessMessage>{success}</SuccessMessage>
 
         <Button type="submit">Register</Button>
       </Form>

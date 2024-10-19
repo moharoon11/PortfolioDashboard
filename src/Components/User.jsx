@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-// Styled components for the form
+// Styled components for the container and forms
 const UserControlsContainer = styled.div`
   max-width: 600px;
   margin: 30px auto;
@@ -9,6 +9,9 @@ const UserControlsContainer = styled.div`
   border-radius: 12px;
   background: linear-gradient(135deg, #f2f2f2 30%, #e6e6e6);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
 `;
 
 const Title = styled.h2`
@@ -89,6 +92,10 @@ const ErrorMessage = styled.p`
   margin-top: 5px;
 `;
 
+const FormSection = styled.div`
+  margin-bottom: 30px; // Space between form sections
+`;
+
 function User({ userId }) {
   const [userDTO, setUserDTO] = useState({
     userId: userId,
@@ -141,21 +148,21 @@ function User({ userId }) {
   // Handle text field updates
   const handleTextFieldUpdate = async (e) => {
     e.preventDefault();
-  
+
     // Validate password before submitting
     if (!validatePassword(userDTO.password)) {
       alert('Password must be at least 6 characters long and contain at least one number.');
       return;
     }
-  
+
     // Validate email
     if (!isValidEmail(userDTO.email)) {
       setEmailError('Please enter a valid email address in the format: example@domain.com');
       return;
     }
-  
+
     setEmailError(''); // Clear previous error message
-  
+
     try {
       const response = await fetch(`http://localhost:8888/api/users/update/info`, {
         method: 'PUT',
@@ -164,15 +171,15 @@ function User({ userId }) {
         },
         body: JSON.stringify(userDTO),
       });
-  
+
       if (!response.ok) {
         const errorResponse = await response.json(); // Get the error response body
-  
+
         // Check if the errorResponse has a message property
         const errorMessage = errorResponse.message || 'An error occurred. Please try again.';
         throw new Error(errorMessage); // Throw an error with the specific message
       }
-  
+
       const result = await response.json();
       alert(result.message); // Display success message
     } catch (error) {
@@ -180,7 +187,6 @@ function User({ userId }) {
       alert(`Failed to update user fields: ${error.message}`); // Show backend error message
     }
   };
-  
 
   // Handle file uploads
   const handleFileUpload = async (fileType) => {
@@ -216,114 +222,119 @@ function User({ userId }) {
   return (
     <UserControlsContainer>
       <Title>Update User Information</Title>
-      <form onSubmit={handleTextFieldUpdate}>
-        <FormGroup>
-          <Label htmlFor="name">Name</Label>
-          <Input
-            type="text"
-            id="name"
-            value={userDTO.name}
-            onChange={(e) => setUserDTO({ ...userDTO, name: e.target.value })}
-            required
-          />
-        </FormGroup>
 
+      {/* User Info Update Form */}
+      <FormSection>
+        <form onSubmit={handleTextFieldUpdate}>
+          <FormGroup>
+            <Label htmlFor="name">Name</Label>
+            <Input
+              type="text"
+              id="name"
+              value={userDTO.name}
+              onChange={(e) => setUserDTO({ ...userDTO, name: e.target.value })}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              id="email"
+              value={userDTO.email}
+              onChange={(e) => {
+                setUserDTO({ ...userDTO, email: e.target.value });
+                setEmailError(''); // Clear error on input change
+              }}
+              required
+            />
+            {emailError && <ErrorMessage>{emailError}</ErrorMessage>} {/* Display email error */}
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              value={userDTO.password}
+              onChange={(e) => setUserDTO({ ...userDTO, password: e.target.value })}
+              required
+            />
+            <TogglePasswordButton type="button" onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? 'Hide' : 'Show'} Password
+            </TogglePasswordButton>
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="role">Role</Label>
+            <Input
+              type="text"
+              id="role"
+              value={userDTO.role}
+              onChange={(e) => setUserDTO({ ...userDTO, role: e.target.value })}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="about">About</Label>
+            <TextArea
+              id="about"
+              value={userDTO.about}
+              onChange={(e) => setUserDTO({ ...userDTO, about: e.target.value })}
+              required
+            />
+          </FormGroup>
+
+          <Button type="submit">Update Information</Button>
+        </form>
+      </FormSection>
+
+      {/* Profile Image Uploads */}
+      <FormSection>
+        <Title>Upload Profile Images</Title>
+        {Array.from({ length: 4 }, (_, index) => (
+          <FormGroup key={index}>
+            <Label htmlFor={`userImage${index + 1}`}>Profile Image {index + 1}</Label>
+            <Input
+              type="file"
+              id={`userImage${index + 1}`}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  setUserDTO({ ...userDTO, [`userImage${index + 1}`]: file });
+                }
+              }}
+              accept="image/*"
+            />
+            <Button type="button" onClick={() => handleFileUpload(`userImage${index + 1}`)}>
+              Upload Image {index + 1}
+            </Button>
+          </FormGroup>
+        ))}
+      </FormSection>
+
+      {/* Resume Upload */}
+      <FormSection>
         <FormGroup>
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="resume">Upload Resume</Label>
           <Input
-            type="email"
-            id="email"
-            value={userDTO.email}
+            type="file"
+            id="resume"
             onChange={(e) => {
-              setUserDTO({ ...userDTO, email: e.target.value });
-              setEmailError(''); // Clear error on input change
+              const file = e.target.files[0];
+              if (file) {
+                setUserDTO({ ...userDTO, resume: file });
+              }
             }}
-            required
+            accept=".pdf"
           />
-          {emailError && <ErrorMessage>{emailError}</ErrorMessage>} {/* Display email error */}
+          <Button type="button" onClick={() => handleFileUpload('resume')}>
+            Upload Resume
+          </Button>
         </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            type={showPassword ? 'text' : 'password'}
-            id="password"
-            value={userDTO.password}
-            onChange={(e) => setUserDTO({ ...userDTO, password: e.target.value })}
-            required
-          />
-          <TogglePasswordButton type="button" onClick={() => setShowPassword(!showPassword)}>
-            {showPassword ? 'Hide' : 'Show'}
-          </TogglePasswordButton>
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="role">Role</Label>
-          <Input
-            type="text"
-            id="role"
-            value={userDTO.role}
-            onChange={(e) => setUserDTO({ ...userDTO, role: e.target.value })}
-          />
-        </FormGroup>
-
-        <FormGroup>
-          <Label htmlFor="about">About</Label>
-          <TextArea
-            id="about"
-            value={userDTO.about}
-            onChange={(e) => setUserDTO({ ...userDTO, about: e.target.value })}
-            rows="4"
-          />
-        </FormGroup>
-
-        <Button type="submit">Update User Fields</Button>
-      </form>
-
-      {/* File upload sections */}
-      <FormGroup>
-        <Label htmlFor="userImage1">Profile Image 1 (Optional)</Label>
-        <Input
-          type="file"
-          accept="image/*"
-          id="userImage1"
-          onChange={(e) => setUserDTO({ ...userDTO, userImage1: e.target.files[0] })}
-        />
-        <Button type="button" onClick={() => handleFileUpload('userImage1')}>Upload Image 1</Button>
-      </FormGroup>
-
-      <FormGroup>
-        <Label htmlFor="userImage2">Profile Image 2 (Optional)</Label>
-        <Input
-          type="file"
-          accept="image/*"
-          id="userImage2"
-          onChange={(e) => setUserDTO({ ...userDTO, userImage2: e.target.files[0] })}
-        />
-        <Button type="button" onClick={() => handleFileUpload('userImage2')}>Upload Image 2</Button>
-      </FormGroup>
-
-      <FormGroup>
-        <Label htmlFor="userImage3">Profile Image 3 (Optional)</Label>
-        <Input
-          type="file"
-          accept="image/*"
-          id="userImage3"
-          onChange={(e) => setUserDTO({ ...userDTO, userImage3: e.target.files[0] })}
-        />
-        <Button type="button" onClick={() => handleFileUpload('userImage3')}>Upload Image 3</Button>
-      </FormGroup>
-
-      <FormGroup>
-        <Label htmlFor="resume">Resume (Optional)</Label>
-        <Input
-          type="file"
-          accept=".pdf,.doc,.docx"
-          id="resume"
-          onChange={(e) => setUserDTO({ ...userDTO, resume: e.target.files[0] })}
-        />
-        <Button type="button" onClick={() => handleFileUpload('resume')}>Upload Resume</Button>
-      </FormGroup>
+      </FormSection>
     </UserControlsContainer>
   );
 }
