@@ -117,7 +117,7 @@ function User({ userId }) {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`http://localhost:8888/api/users/get/${userId}`);
+        const response = await fetch(`http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/users/get/${userId}`);
         const data = await response.json();
         setUserDTO({ ...data });
       } catch (error) {
@@ -164,7 +164,7 @@ function User({ userId }) {
     setEmailError(''); // Clear previous error message
 
     try {
-      const response = await fetch(`http://localhost:8888/api/users/update/info`, {
+      const response = await fetch(`http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/users/update/info`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ function User({ userId }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:8888/api/users/update/${fileType}/${userId}`, {
+      const response = await fetch(`http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/users/update/${fileType}/${userId}`, {
         method: 'PUT',
         body: formData,
       });

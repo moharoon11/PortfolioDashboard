@@ -96,7 +96,7 @@ const Login = () => {
     };
   
     try {
-      const response = await fetch('http://localhost:8888/api/users/login', {
+      const response = await fetch('http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

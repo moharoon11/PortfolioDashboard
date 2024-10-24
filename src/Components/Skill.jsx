@@ -30,7 +30,7 @@ function Skill({ userId }) {
 
   const fetchSkills = async () => {
     try {
-      const response = await fetch(`http://localhost:8888/api/skills/getAll/${userId}`);
+      const response = await fetch(`http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/skills/getAll/${userId}`);
       const data = await response.json();
       setSkills(data);
     } catch (error) {
@@ -72,8 +72,8 @@ function Skill({ userId }) {
     }
 
     const url = isEditing
-      ? `http://localhost:8888/api/skills/update`
-      : `http://localhost:8888/api/skills/create`;
+      ? `http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/skills/update`
+      : `http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/skills/create`;
 
     const method = isEditing ? 'PUT' : 'POST';
 
@@ -101,7 +101,7 @@ function Skill({ userId }) {
 
   const handleDelete = async (skillId) => {
     try {
-      const response = await fetch(`http://localhost:8888/api/skills/delete/${userId}/${skillId}`, {
+      const response = await fetch(`http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/skills/delete/${userId}/${skillId}`, {
         method: 'DELETE',
       });
       if (response.ok) {

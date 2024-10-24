@@ -100,7 +100,7 @@ function Project({ userId }) {
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`http://localhost:8888/api/projects/user/${userId}`);
+      const response = await fetch(`http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/projects/user/${userId}`);
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
@@ -141,11 +141,11 @@ function Project({ userId }) {
 
     try {
       const response = projectId
-        ? await fetch('http://localhost:8888/api/projects/update', {
+        ? await fetch('http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/projects/update', {
             method: 'PUT',
             body: formData,
           })
-        : await fetch('http://localhost:8888/api/projects/create', {
+        : await fetch('http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/projects/create', {
             method: 'POST',
             body: formData,
           });
@@ -187,7 +187,7 @@ function Project({ userId }) {
 
   const handleDelete = async (projectId) => {
     try {
-      const response = await fetch(`http://localhost:8888/api/projects/delete/${userId}/${projectId}`, {
+      const response = await fetch(`http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/projects/delete/${userId}/${projectId}`, {
         method: 'DELETE',
       });
 
