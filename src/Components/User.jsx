@@ -294,7 +294,7 @@ function User({ userId }) {
       {/* Profile Image Uploads */}
       <FormSection>
         <Title>Upload Profile Images</Title>
-        {Array.from({ length: 4 }, (_, index) => (
+        {Array.from({ length: 3 }, (_, index) => (
           <FormGroup key={index}>
             <Label htmlFor={`userImage${index + 1}`}>Profile Image {index + 1}</Label>
             <Input

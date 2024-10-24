@@ -156,10 +156,12 @@ function Project({ userId }) {
 
       const data = await response.json();
       console.log('Project saved successfully:', data);
+      alert("Project saved successfully");
       // Reset form after submission
       resetForm();
       fetchProjects(); // Refresh the project list
     } catch (error) {
+      alert("failed to save project! try refreshing the page")
       console.error('Error saving project:', error);
     }
   };
@@ -197,8 +199,10 @@ function Project({ userId }) {
 
       const data = await response.json();
       console.log(data.message); // Log deletion message
+      alert("project deleted successfully!")
       fetchProjects(); // Refresh the project list after deletion
     } catch (error) {
+      alert("failed to delete project! try refreshing the page")
       console.error('Error deleting project:', error);
     }
   };
@@ -292,8 +296,17 @@ function Project({ userId }) {
               </td>
               <td>{project.projectName}</td>
               <td>{project.projectDescription}</td>
-              <td><a href={project.liveLink} target="_blank" rel="noopener noreferrer">View</a></td>
-              <td><a href={project.codeLink} target="_blank" rel="noopener noreferrer">View</a></td>
+              <td>
+  {project.liveLink ? (
+    <a href={project.liveLink} target="_blank" rel="noopener noreferrer">View</a>
+  ) : 'null'}
+</td>
+<td>
+  {project.codeLink ? (
+    <a href={project.codeLink} target="_blank" rel="noopener noreferrer">View</a>
+  ) : 'null'}
+</td>
+
               <td>{project.technology}</td>
               <td>
                 <StyledButton onClick={() => handleEdit(project)}>Edit</StyledButton>

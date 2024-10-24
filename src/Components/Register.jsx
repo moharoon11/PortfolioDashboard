@@ -183,7 +183,7 @@ function Register() {
     e.preventDefault();
     const userIdPattern = /^[0-9]{8}$/;
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email validation
-    const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/; // At least 8 chars, 1 letter and 1 number
+    const passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_]{8,}$/; // At least 8 chars, 1 letter and 1 number 1 special case
 
     if (!userIdPattern.test(formData.userId)) {
       setError('User ID must be exactly 8 digits.');
