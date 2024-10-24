@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-// Import Google Fonts
-import { createGlobalStyle } from 'styled-components';
 
-const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-  body {
-    font-family: 'Roboto', sans-serif;
-  }
-`;
+
+
 
 function Skill({ userId }) {
+
+  
   const [skills, setSkills] = useState([]);
   const [formData, setFormData] = useState({
     skillName: '',
@@ -23,10 +19,10 @@ function Skill({ userId }) {
     point4: '',
     point5: '',
     sourceLink: '',
+    icon: null,
+    skillId: null,
   });
   const [isEditing, setIsEditing] = useState(false);
-  const [editSkillId, setEditSkillId] = useState(null);
-  const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
     fetchSkills();
@@ -43,36 +39,61 @@ function Skill({ userId }) {
   };
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, files } = e.target;
+    if (name === 'icon') {
+      setFormData({ ...formData, [name]: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const skillData = isEditing
-      ? { ...formData, skillId: editSkillId, userId }
-      : { ...formData, userId };
+    const formPayload = new FormData();
 
-    const url = isEditing ? 'http://localhost:8888/api/skills/update' : 'http://localhost:8888/api/skills/create';
+    const skillDTO = {
+      skillName: formData.skillName,
+      learnedFrom: formData.learnedFrom,
+      point1: formData.point1,
+      point2: formData.point2,
+      point3: formData.point3,
+      point4: formData.point4,
+      point5: formData.point5,
+      sourceLink: formData.sourceLink,
+      userId: userId,
+      skillId: isEditing ? formData.skillId : null,
+    };
+
+    formPayload.append("skillDTO", new Blob([JSON.stringify(skillDTO)], { type: 'application/json' }));
+
+    // Change the key from "icon" to "skillIcon"
+    if (formData.icon) {
+      formPayload.append("skillIcon", formData.icon); // Updated key name
+    }
+
+    const url = isEditing
+      ? `http://localhost:8888/api/skills/update`
+      : `http://localhost:8888/api/skills/create`;
+
     const method = isEditing ? 'PUT' : 'POST';
 
     try {
       const response = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(skillData),
+        body: formPayload,
       });
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Error submitting skill:', errorText);
+        alert('Failed to submit skill: ' + errorText);
         return;
       }
 
-      fetchSkills();
-      resetForm();
-      setIsEditing(false);
+
+      alert(`Skill ${isEditing ? 'updated' : 'added'} successfully!`);
+      fetchSkills(); // Refresh the skills list
+      resetForm(); // Reset the form after submission
     } catch (error) {
       console.error('Error submitting skill:', error);
     }
@@ -84,11 +105,14 @@ function Skill({ userId }) {
         method: 'DELETE',
       });
       if (response.ok) {
-        fetchSkills();
+        alert('Skill deleted successfully!');
+        fetchSkills(); // Refresh the skills list after deletion
       } else {
+        alert("failed deleting skill")
         console.error('Error deleting skill:', response.statusText);
       }
     } catch (error) {
+      alert('Error deleting skill: ' + error.message);
       console.error('Error deleting skill:', error);
     }
   };
@@ -103,9 +127,10 @@ function Skill({ userId }) {
       point4: '',
       point5: '',
       sourceLink: '',
+      icon: null,
+      skillId: null,
     });
     setIsEditing(false);
-    setEditSkillId(null);
   };
 
   const handleEdit = (skill) => {
@@ -118,22 +143,15 @@ function Skill({ userId }) {
       point4: skill.point4,
       point5: skill.point5,
       sourceLink: skill.sourceLink,
+      icon: null, // No file editing
+      skillId: skill.skillId,
     });
     setIsEditing(true);
-    setEditSkillId(skill.skillId);
-  };
-
-  // Handle leaving the page with fade-out effect
-  const handleLeavePage = () => {
-    setIsLeaving(true);
-    setTimeout(() => {
-      // Call your navigation logic here
-    }, 500); // Adjust timeout based on your fade-out duration
   };
 
   return (
     <SkillContainer>
-      <GlobalStyle />
+      
       <SkillForm onSubmit={handleSubmit}>
         <h2>{isEditing ? 'Edit Skill' : 'Add Skill'}</h2>
         <Input
@@ -168,6 +186,12 @@ function Skill({ userId }) {
           value={formData.sourceLink}
           onChange={handleInputChange}
         />
+        <Input
+          type="file"
+          name="icon"
+          accept="image/*"
+          onChange={handleInputChange}
+        />
         <SubmitButton type="submit">{isEditing ? 'Update Skill' : 'Add Skill'}</SubmitButton>
         {isEditing && <CancelButton onClick={resetForm}>Cancel</CancelButton>}
       </SkillForm>
@@ -177,7 +201,7 @@ function Skill({ userId }) {
         <SkillGrid>
           {skills.length > 0 ? (
             skills.map((skill) => (
-              <SkillItem key={skill.skillId} className={`fade-in ${isLeaving ? 'fade-out' : ''}`}>
+              <SkillItem key={skill.skillId}>
                 <SkillDetails>
                   <h3>{skill.skillName}</h3>
                   {skill.learnedFrom && (
@@ -205,7 +229,7 @@ function Skill({ userId }) {
               </SkillItem>
             ))
           ) : (
-            <p>No skills added yet.</p>
+            <p>No skills found.</p>
           )}
         </SkillGrid>
       </SkillList>
@@ -213,105 +237,85 @@ function Skill({ userId }) {
   );
 }
 
-// Styled-components
+// Styled Components
 const SkillContainer = styled.div`
   padding: 20px;
-  max-width: 1200px;
+  max-width: 800px;
   margin: auto;
+  background: #f8f8f8;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 `;
 
 const SkillForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  margin-bottom: 20px;
 `;
 
 const Input = styled.input`
+  margin: 10px 0;
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
+  border-radius: 4px;
 `;
 
 const SubmitButton = styled.button`
-  padding: 10px 20px;
-  background-color: #4caf50;
+  padding: 10px;
+  background: #28a745;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: #45a049;
+    background: #218838;
   }
 `;
 
 const CancelButton = styled.button`
-  padding: 10px 20px;
-  background-color: #f44336;
+  padding: 10px;
+  background: #dc3545;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: #e03528;
+    background: #c82333;
   }
 `;
 
 const SkillList = styled.div`
-  margin-top: 40px;
+  margin-top: 20px;
 `;
 
 const SkillGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
 `;
 
 const SkillItem = styled.div`
+  background: #fff;
   padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  background-color: black;  // Changed to black background
-  color: white;  // Adjusted text color for contrast
-  position: relative;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ddd; // Optional: Light border for distinction
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
-
-  &.fade-out {
-    opacity: 0;
-    transition: opacity 0.5s ease-out;
-  }
-
-  &.fade-in {
-    opacity: 1;
-    transition: opacity 0.5s ease-in;
-  }
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 10px;
+  flex: 1 1 calc(33.333% - 20px); // Responsive
 `;
 
 const SkillDetails = styled.div`
-  flex: 1;
+  margin-bottom: 10px;
 `;
 
 const PointsList = styled.ul`
   list-style-type: none;
-  padding-left: 0;
+  padding: 0;
 `;
 
 const SourceLink = styled.a`
-  color: #4caf50;
+  color: #007bff;
   text-decoration: none;
-
   &:hover {
     text-decoration: underline;
   }
@@ -323,28 +327,26 @@ const SkillActions = styled.div`
 `;
 
 const EditButton = styled.button`
-  background-color: #2196f3;
+  background: #007bff;
   color: white;
   border: none;
-  padding: 10px;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: #1976d2;
+    background: #0056b3;
   }
 `;
 
 const DeleteButton = styled.button`
-  background-color: #f44336;
+  background: #dc3545;
   color: white;
   border: none;
-  padding: 10px;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
 
   &:hover {
-    background-color: #d32f2f;
+    background: #c82333;
   }
 `;
 

@@ -242,14 +242,14 @@ function Project({ userId }) {
             value={liveLink}
             onChange={(e) => setLiveLink(e.target.value)}
             placeholder="Live Link"
-            required
+            
           />
           <StyledInput
             type="text"
             value={codeLink}
             onChange={(e) => setCodeLink(e.target.value)}
             placeholder="Code Link"
-            required
+            
           />
           <StyledInput
             type="text"

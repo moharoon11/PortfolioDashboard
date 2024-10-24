@@ -216,24 +216,31 @@ function Register() {
     data.append('resume', formData.resume);
 
     try {
-      const response = await fetch('http://localhost:8888/api/users/register', {
+      const response = await fetch('http://ec2-13-126-99-50.ap-south-1.compute.amazonaws.com:8888/api/users/register', {
         method: 'POST',
         body: data,
       });
 
+
+      
       const result = await response.json(); // Parse the JSON response
 
       if (!response.ok) {
+        console.log("error occured")
         throw new Error(result.message || 'Error registering user.');
       }
 
       console.log('User registered successfully:', result);
+    
       setError('');
-      setSuccess(result.message); // Set success message from the response
+      setSuccess(result.message); 
+      alert("register sucess");
+      // Set success message from the response
     } catch (err) {
       console.error('Error registering user:', err);
       setError(err.message || 'Error registering user.');
-      setSuccess(''); // Clear success message on error
+      setSuccess(''); 
+      alert("failed to register");// Clear success message on error
     }
   };
 
